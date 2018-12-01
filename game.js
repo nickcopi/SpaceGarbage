@@ -8,6 +8,18 @@ class Game{
 		this.rotateLeftKeys = [81,37]
 		this.rotateRightKeys = [69,39]
 		this.BOTTOM_BORDER = this.HEIGHT - 100;
+		this.weapons = {
+			blaster: new Weapon('Blaster',10,0.0000001,1,1,20,3),
+			fasterBlaster: new Weapon('Faster Blaster',15,0.0000001,1,1,10,3),
+			ionCannon: new Weapon('Ion Cannon',5,0.000001,1,2,10,10),
+			particleShredder: new Weapon('Particle Shredder',15,Math.PI/8,5,2,10,3),
+		}
+		this.waveTexts = [
+			'WASD or arrow keys to move. Space to shoot.',
+			'That wasn\'t so bad, was it?',
+			'Faster Blaster unlocked!',
+		
+		];
 	}
 	addCanvas(canvas){
 		this.scene = new Scene(canvas);	
@@ -19,7 +31,7 @@ class Scene{
 		this.ctx = canvas.getContext('2d');
 		this.keys = [];
 		this.enemiesLeft = 0;
-		this.infoText = 'WASD or arrow keys to move. Space to shoot.';
+		this.infoText;
 		this.time = 0;
 		this.wave = 0;
 		this.score = 0;
@@ -72,6 +84,7 @@ class Scene{
 		}
 	}
 	newRound(){
+		this.infoText = game.waveTexts[this.wave];
 		this.wave++;
 		this.enemiesLeft = Math.ceil(this.wave/4) * 10;
 		//handle new weapon unlock
@@ -227,6 +240,11 @@ class Scene{
 		ctx.fillText(`Lives: ${this.lives}`, 10,bb+80);
 		ctx.font = '30px Asteroids';
 		ctx.fillText(this.infoText, 180,bb+50);
+		ctx.font = '20px Asteroids';
+		ctx.fillText(`Weapon: ${you.weapon.name}`, 1000,bb+30);
+		ctx.fillText(`${60/you.weapon.fireDelay} shots per second`, 1000,bb+55);
+		let flech = you.weapon.flechettes;
+		ctx.fillText(`${flech} bullet${flech>1?'s':''} per shot`, 1000,bb+80);
 		/*Draw game*/
 		
 		ctx.save();
@@ -245,7 +263,6 @@ class Scene{
 				ctx.lineTo(lines[nl].x,lines[nl].y);
 				ctx.stroke();
 			});
-
 		});
 		this.bullets.forEach(bullet=>{
 			ctx.beginPath();
@@ -264,7 +281,9 @@ class You{
 		this.width = 50;
 		this.height = 30;
 		this.speed = 5;
-		this.weapon = new Weapon(15,Math.PI/4,5,2,10);
+		this.weapons = [game.weapons.blaster]
+		this.currentWeapon = 0;
+		this.weapon = this.weapons[this.currentWeapon];
 		this.shooting = false;
 	}
 	getCenter(){
@@ -321,19 +340,21 @@ class Enemy{
 
 }
 class Weapon{
-	constructor(speed,spread,flechettes,pierce,fireDelay){
+	constructor(name,speed,spread,flechettes,pierce,fireDelay,projSize){
+		this.name = name;
 		this.speed = speed;
 		this.spread = spread;
 		this.flechettes = flechettes;
 		this.pierce = pierce;
 		this.fireDelay = fireDelay;
 		this.timeout = 0;
+		this.projSize = projSize;
 	} 
 	shoot(you,x,y){
 		if(this.timeout > game.scene.time)
 			return;
 		for(let i = -this.spread/2;i<this.spread/2;i+=this.spread/this.flechettes){
-			let bullet = new Bullet(you.getFirePoint().x,you.getFirePoint().y,this.speed);
+			let bullet = new Bullet(you.getFirePoint().x,you.getFirePoint().y,this.speed,this.projSize);
 			bullet.setDirection(x,y,x > 0, y > 0,i);
 			game.scene.bullets.push(bullet);
 		}
@@ -341,13 +362,12 @@ class Weapon{
 	}
 }	
 class Bullet {
-	constructor(x,y,speed,pierce){
+	constructor(x,y,speed,radius){
 		this.x = x;
 		this.y = y;
-		this.width = 3;
-		this.height = 3;
+		this.width = radius;
+		this.height = radius;
 		this.speed = speed;
-		this.pierece = pierce;
 	}
 	setDirection(x,y,xSign,ySign,spread){
 		let theta = game.scene.you.theta;//Math.atan(Math.abs(y)/Math.abs(x));
