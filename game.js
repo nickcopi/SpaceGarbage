@@ -14,7 +14,10 @@ class Game{
 			blaster: new Weapon('Blaster',0,10,0.0000001,1,1,20,3),
 			fasterBlaster: new Weapon('Faster Blaster',3,15,0.0000001,1,1,10,3),
 			ionCannon: new Weapon('Ion Cannon',5,5,0.000001,3,2,20,15),
-			particleShredder: new Weapon('Particle Shredder',7,15,Math.PI/8,5,2,10,3),
+			ionBeam: new Weapon('Ion Beam',7,20,0.000001,1,2,5,2,true),
+			particleShredder: new Weapon('Quark Shredder',9,15,Math.PI/8,5,2,10,1),
+			bigBlaster: new Weapon('Big Blaster',11,10,0.000001,2,2,8,15,1),
+			turboBeam: new Weapon('Turbo Boom',13,15,Math.PI/8,7,2,10,3,1),
 		}
 		this.waveTexts = [
 			'WASD or arrow keys to move. Space to shoot.',
@@ -23,6 +26,13 @@ class Game{
 			'Use Q and E or , and. to change wepaons.',
 			'Ion Cannon unlocked!',
 			'Different weapons have different stats.',
+			'Ion Beam unlocked!',
+			'Auto weapons let you hold down space.',
+			'Quark Shredder unlocked!',
+			'What\'s your favorite weapon?',
+			'Big Blaster unlocked!',
+			'What\'s your favorite weapon?',
+			'Turbo Boom unlocked!',
 		
 		];
 	}
@@ -89,7 +99,7 @@ class Scene{
 		}
 	}
 	newRound(){
-		this.infoText = game.waveTexts[this.wave];
+		if(game.waveTexts[this.wave]) this.infoText = game.waveTexts[this.wave];
 		this.wave++;
 		for(let x in game.weapons){
 			if(game.weapons[x].level == this.wave)
@@ -266,7 +276,8 @@ class Scene{
 		ctx.font = '30px Asteroids';
 		ctx.fillText(this.infoText, 180,bb+60);
 		ctx.font = '20px Asteroids';
-		ctx.fillText(`Weapon: ${you.weapons[you.currentWeapon].name}`, 1000,bb+30);
+		let auto = you.weapons[you.currentWeapon].auto;
+		ctx.fillText(`Weapon: ${you.weapons[you.currentWeapon].name} ${auto?'(A)':''}`, 1000,bb+30);
 		ctx.fillText(`${60/you.weapons[you.currentWeapon].fireDelay} shots per second`, 1000,bb+55);
 		let flech = you.weapons[you.currentWeapon].flechettes;
 		ctx.fillText(`${flech} bullet${flech>1?'s':''} per shot`, 1000,bb+80);
@@ -365,7 +376,7 @@ class Enemy{
 
 }
 class Weapon{
-	constructor(name,level, speed,spread,flechettes,pierce,fireDelay,projSize){
+	constructor(name,level, speed,spread,flechettes,pierce,fireDelay,projSize,auto){
 		this.level = level;
 		this.name = name;
 		this.speed = speed;
@@ -374,6 +385,7 @@ class Weapon{
 		this.pierce = pierce;
 		this.fireDelay = fireDelay;
 		this.timeout = 0;
+		this.auto = auto;
 		this.projSize = projSize;
 	} 
 	shoot(you,x,y){
