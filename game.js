@@ -17,7 +17,9 @@ class Game{
 			ionBeam: new Weapon('Ion Beam',7,20,0.000001,1,2,5,2,true),
 			particleShredder: new Weapon('Quark Shredder',9,15,Math.PI/8,5,2,10,1),
 			bigBlaster: new Weapon('Big Blaster',11,10,0.000001,2,2,8,15,1),
-			turboBeam: new Weapon('Turbo Boom',13,15,Math.PI/8,7,2,10,3,1),
+			turboBoom: new Weapon('Turbo Boom',13,15,Math.PI/8,7,2,10,3,1),
+			pBeam: new Weapon('P Beam',17,15,0.00001,1,2,1,1,1),
+			ultimate: new Weapon('Ultimate',19,20,Math.PI/8,7,2,3,3,1),
 		}
 		this.waveTexts = [
 			'WASD or arrow keys to move. Space to shoot.',
@@ -31,8 +33,15 @@ class Game{
 			'Quark Shredder unlocked!',
 			'What\'s your favorite weapon?',
 			'Big Blaster unlocked!',
-			'What\'s your favorite weapon?',
+			'Guns are cool.',
 			'Turbo Boom unlocked!',
+			'Still holding up?',
+			'Haha, no new weapon this round.',
+			'I wish I was a spaceship.',
+			'P Beam unlocked!',
+			'Get ready to have your mind blown.',
+			'Ultimate unlocked!',
+			'Have fun!',
 		
 		];
 	}
@@ -89,10 +98,10 @@ class Scene{
 		if(this.enemies.length == 0 && this.enemiesLeft == 0){
 			this.newRound();
 		}
-		if(!Math.floor((Math.random()*100/this.wave)) && this.enemiesLeft > 0){
+		if(!Math.floor((Math.random()*500/(this.wave+4))) && this.enemiesLeft > 0){
 			let enemyWidth = Math.floor(Math.random() * 40) + 20;
 			let enemyHeight = Math.floor(Math.random() * 40) + 20;
-			let enemySpeed = Math.floor(Math.random() * 6) + 2;
+			let enemySpeed = Math.floor(Math.random() * 2 + (Math.floor(this.wave/5))) + 2;
 			let enemyY = Math.floor(Math.random() * (game.BOTTOM_BORDER-enemyHeight));
 			this.enemies.push(new Enemy(this.canvas.width,enemyY,enemyWidth,enemyHeight,enemySpeed));
 			this.enemiesLeft--;
@@ -350,10 +359,19 @@ class Enemy{
 		this.height = height;
 		this.speed = speed;
 		this.generate();
+		//this.destinationY = Math.floor(Math.random()*game.BOTTOM_BORDER-this.height);
+		//this.setDirection(1,this.destinationY,-1,1);
+	}
+	setDirection(x,y,xSign,ySign){
+		let theta = Math.atan(Math.abs(y)/Math.abs(x));
+		console.log(theta * Math.PI)
+		this.direction = {};
+		this.direction.x = Math.cos(theta) * (xSign?1:-1);
+		this.direction.y = Math.sin(theta) * (ySign?1:-1);
 	}
 	generate(){
 		this.lines = [];
-		for(let i = 0; i < Math.floor(Math.random()*4) + 4; i++){
+		for(let i = 0; i < Math.floor(Math.random()*2 + (Math.floor(game.scene.wave/4))) + 3; i++){
 			this.lines.push({
 				x: Math.floor(Math.random()*this.width),
 				y: Math.floor(Math.random()*this.height)
@@ -371,6 +389,8 @@ class Enemy{
 		return shiftedLines;
 	}
 	move(){
+		//this.x += this.speed * this.direction.x;
+		//this.y += this.speed * this.direction.y;
 		this.x -= this.speed;
 	}
 
