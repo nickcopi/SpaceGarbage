@@ -59,7 +59,7 @@ class Scene{
 		this.time = 0;
 		this.wave = 0;
 		this.score = 0;
-		this.lives = 50;
+		this.lives = 100;
 		this.enemies = [];
 		this.bullets = [];
 		this.paused = true;
@@ -115,7 +115,6 @@ class Scene{
 				this.you.weapons.push(game.weapons[x]);
 		}
 		this.enemiesLeft = Math.ceil(this.wave/4) * 10;
-		//handle new weapon unlock
 	}
 	handleKeyDown(e){
 		if(e.keyCode != 27) game.scene.paused = false;
@@ -127,6 +126,13 @@ class Scene{
 		game.scene.keys[e.keyCode] = true;
 	}
 	handleKeyUp(e){
+		if(game.scene.gameEnd < game.scene.time -60){
+			clearInterval(game.scene.interval);
+			let canvas = game.scene.canvas;
+			game = new Game();
+			game.addCanvas(canvas);
+			return;
+		}
 		game.weaponsLeftKeys.forEach((key)=>{
 			if(key == e.keyCode){
 				let you = game.scene.you;
@@ -151,6 +157,10 @@ class Scene{
 	}
 	update(){
 		if(this.paused) return;
+		if(this.gameEnd) {
+			this.time++;
+			return;
+		}
 		this.moveYou();
 		this.doRound();
 		this.moveBullets();
@@ -200,6 +210,7 @@ class Scene{
 	}
 	endGame(){
 		//implement
+		this.gameEnd = this.time;
 	}
 	moveEnemies(){
 		this.enemies.forEach(enem=>{
@@ -270,6 +281,18 @@ class Scene{
 			ctx.fillStyle = 'white';
 			ctx.font = '150px AsteroidsLite';
 			ctx.fillText(`Space Garbage`, 40,canvas.height/2 + 25);
+			return;
+		}
+		/*check if gameEnd*/
+		if(this.gameEnd){
+			ctx.fillStyle = 'black';
+			ctx.fillRect(0,0,canvas.width,canvas.height);
+			ctx.fillStyle = 'white';
+			ctx.font = '150px AsteroidsLite';
+			ctx.fillText(`Game Over!`, 175,canvas.height/2);
+			ctx.font = '100px AsteroidsLite';
+			let text = `Score: ${this.score}`;
+			ctx.fillText(text, canvas.width/2 - ctx.measureText(text).width/2,canvas.height/2 + 110);
 			return;
 		}
 		/*Draw "UI"*/
