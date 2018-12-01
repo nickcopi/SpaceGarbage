@@ -19,12 +19,15 @@ class Scene{
 		this.ctx = canvas.getContext('2d');
 		this.keys = [];
 		this.enemiesLeft = 0;
+		this.infoText = 'WASD or arrow keys to move. Space to shoot.';
 		this.time = 0;
 		this.wave = 0;
 		this.score = 0;
+		this.lives = 50;
 		this.enemies = [];
 		this.bullets = [];
-		this.you = new You(0,720/2-40);
+		this.paused = true;
+		this.you = new You(5,720/2-40);
 		this.initCanvas();
 		this.interval = setInterval(()=>{
 			this.update();
@@ -74,6 +77,8 @@ class Scene{
 		//handle new weapon unlock
 	}
 	handleKeyDown(e){
+		if(e.keyCode != 27) game.scene.paused = false;
+		else game.scene.paused = true;
 		game.shootKeys.forEach((key)=>{
 			if(key == e.keyCode) game.scene.you.shooting = true;
 
@@ -88,6 +93,7 @@ class Scene{
 		game.scene.keys[e.keyCode] = false;
 	}
 	update(){
+		if(this.paused) return;
 		this.moveYou();
 		this.doRound();
 		this.moveBullets();
@@ -145,7 +151,8 @@ class Scene{
 		for(let i = 0; i< this.enemies.length;i++){
 			let enem = this.enemies[i];
 			if(enem.x + enem.width < 0){
-				this.endGame();
+				this.lives -= enem.lines.length;
+				if(this.lives <= 0) this.endGame();
 				this.enemies.splice(i,1);
 				i++;
 			}
@@ -186,10 +193,10 @@ class Scene{
 		});
 		if(rotateRight && rotateLeft) return;
 		if(rotateRight){
-			this.you.theta += Math.PI/100;
+			this.you.theta += Math.PI/50;
 		}
 		if(rotateLeft){
-			this.you.theta -= Math.PI/100;
+			this.you.theta -= Math.PI/50;
 		}
 
 	}
@@ -199,6 +206,15 @@ class Scene{
 		let bb = game.BOTTOM_BORDER;
 		let you = this.you;
 		ctx.clearRect(0,0,canvas.width,canvas.height);
+		/*check if paused*/
+		if(this.paused){
+			ctx.fillStyle = 'black';
+			ctx.fillRect(0,0,canvas.width,canvas.height);
+			ctx.fillStyle = 'white';
+			ctx.font = '150px AsteroidsLite';
+			ctx.fillText(`Space Garbage`, 40,canvas.height/2 + 25);
+			return;
+		}
 		/*Draw "UI"*/
 		ctx.fillStyle = 'black';
 		ctx.fillRect(0,0,canvas.width,canvas.height);
@@ -208,7 +224,9 @@ class Scene{
 		ctx.font = '20px Asteroids';
 		ctx.fillText(`Wave: ${this.wave}`, 10,bb+30);
 		ctx.fillText(`Score: ${this.score}`, 10,bb+55);
-		ctx.fillText(`Enemies Left: ${this.enemiesLeft}`, 10,bb+80);
+		ctx.fillText(`Lives: ${this.lives}`, 10,bb+80);
+		ctx.font = '30px Asteroids';
+		ctx.fillText(this.infoText, 180,bb+50);
 		/*Draw game*/
 		
 		ctx.save();
@@ -326,13 +344,13 @@ class Bullet {
 	constructor(x,y,speed,pierce){
 		this.x = x;
 		this.y = y;
-		this.width = 5;
-		this.height = 5;
+		this.width = 3;
+		this.height = 3;
 		this.speed = speed;
 		this.pierece = pierce;
 	}
 	setDirection(x,y,xSign,ySign,spread){
-		let theta = Math.atan(Math.abs(y)/Math.abs(x));
+		let theta = game.scene.you.theta;//Math.atan(Math.abs(y)/Math.abs(x));
 		theta += spread;
 		this.direction = {};
 		this.direction.x = Math.cos(theta) * (xSign?1:-1);
