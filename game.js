@@ -5,19 +5,24 @@ class Game{
 		this.upKeys = [87,38];
 		this.downKeys = [83,40];
 		this.shootKeys = [32,13];
-		this.rotateLeftKeys = [81,37]
-		this.rotateRightKeys = [69,39]
+		this.rotateLeftKeys = [65,37]
+		this.rotateRightKeys = [68,39]
+		this.weaponsLeftKeys = [81,37]
+		this.weaponsRightKeys = [69,39]
 		this.BOTTOM_BORDER = this.HEIGHT - 100;
 		this.weapons = {
-			blaster: new Weapon('Blaster',10,0.0000001,1,1,20,3),
-			fasterBlaster: new Weapon('Faster Blaster',15,0.0000001,1,1,10,3),
-			ionCannon: new Weapon('Ion Cannon',5,0.000001,1,2,10,10),
-			particleShredder: new Weapon('Particle Shredder',15,Math.PI/8,5,2,10,3),
+			blaster: new Weapon('Blaster',0,10,0.0000001,1,1,20,3),
+			fasterBlaster: new Weapon('Faster Blaster',3,15,0.0000001,1,1,10,3),
+			ionCannon: new Weapon('Ion Cannon',5,5,0.000001,3,2,20,15),
+			particleShredder: new Weapon('Particle Shredder',7,15,Math.PI/8,5,2,10,3),
 		}
 		this.waveTexts = [
 			'WASD or arrow keys to move. Space to shoot.',
 			'That wasn\'t so bad, was it?',
 			'Faster Blaster unlocked!',
+			'Use Q and E or , and. to change wepaons.',
+			'Ion Cannon unlocked!',
+			'Different weapons have different stats.',
 		
 		];
 	}
@@ -86,6 +91,10 @@ class Scene{
 	newRound(){
 		this.infoText = game.waveTexts[this.wave];
 		this.wave++;
+		for(let x in game.weapons){
+			if(game.weapons[x].level == this.wave)
+				this.you.weapons.push(game.weapons[x]);
+		}
 		this.enemiesLeft = Math.ceil(this.wave/4) * 10;
 		//handle new weapon unlock
 	}
@@ -99,6 +108,22 @@ class Scene{
 		game.scene.keys[e.keyCode] = true;
 	}
 	handleKeyUp(e){
+		game.weaponsLeftKeys.forEach((key)=>{
+			if(key == e.keyCode){
+				let you = game.scene.you;
+				you.currentWeapon--;
+				if(you.currentWeapon < 0) you.currentWeapon = you.weapons.length-1;
+			}
+
+		});
+		game.weaponsRightKeys.forEach((key)=>{
+			if(key == e.keyCode){
+				let you = game.scene.you;
+				you.currentWeapon++;
+				if(you.currentWeapon >= you.weapons.length) you.currentWeapon = 0;
+			}
+
+		});
 		game.shootKeys.forEach((key)=>{
 			if(key == e.keyCode) game.scene.you.shooting = false;
 
@@ -239,11 +264,11 @@ class Scene{
 		ctx.fillText(`Score: ${this.score}`, 10,bb+55);
 		ctx.fillText(`Lives: ${this.lives}`, 10,bb+80);
 		ctx.font = '30px Asteroids';
-		ctx.fillText(this.infoText, 180,bb+50);
+		ctx.fillText(this.infoText, 180,bb+60);
 		ctx.font = '20px Asteroids';
-		ctx.fillText(`Weapon: ${you.weapon.name}`, 1000,bb+30);
-		ctx.fillText(`${60/you.weapon.fireDelay} shots per second`, 1000,bb+55);
-		let flech = you.weapon.flechettes;
+		ctx.fillText(`Weapon: ${you.weapons[you.currentWeapon].name}`, 1000,bb+30);
+		ctx.fillText(`${60/you.weapons[you.currentWeapon].fireDelay} shots per second`, 1000,bb+55);
+		let flech = you.weapons[you.currentWeapon].flechettes;
 		ctx.fillText(`${flech} bullet${flech>1?'s':''} per shot`, 1000,bb+80);
 		/*Draw game*/
 		
@@ -280,10 +305,9 @@ class You{
 		this.aimY = 400;
 		this.width = 50;
 		this.height = 30;
-		this.speed = 5;
+		this.speed = 7;
 		this.weapons = [game.weapons.blaster]
 		this.currentWeapon = 0;
-		this.weapon = this.weapons[this.currentWeapon];
 		this.shooting = false;
 	}
 	getCenter(){
@@ -299,10 +323,11 @@ class You{
 		}
 	}
 	shoot(){
+		let weapon = this.weapons[this.currentWeapon];
 		if(this.shooting){
-			if(!this.weapon.auto)
+			if(!weapon.auto)
 				this.shooting = false;
-			this.weapon.shoot(this,this.aimX, this.aimY);
+			weapon.shoot(this,this.aimX, this.aimY);
 		}
 	}
 }
@@ -340,7 +365,8 @@ class Enemy{
 
 }
 class Weapon{
-	constructor(name,speed,spread,flechettes,pierce,fireDelay,projSize){
+	constructor(name,level, speed,spread,flechettes,pierce,fireDelay,projSize){
+		this.level = level;
 		this.name = name;
 		this.speed = speed;
 		this.spread = spread;
