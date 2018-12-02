@@ -280,7 +280,11 @@ class Scene{
 			ctx.fillRect(0,0,canvas.width,canvas.height);
 			ctx.fillStyle = 'white';
 			ctx.font = '150px AsteroidsLite';
-			ctx.fillText(`Space Garbage`, 40,canvas.height/2 + 25);
+			let text1 = 'Space Garbage';
+			ctx.fillText(text1, canvas.width/2 - ctx.measureText(text1).width/2,canvas.height/2);
+			ctx.font = '100px AsteroidsLite';
+			let text2 = `Press Any Key`;
+			ctx.fillText(text2, canvas.width/2 - ctx.measureText(text2).width/2,canvas.height/2 + 110);
 			return;
 		}
 		/*check if gameEnd*/
