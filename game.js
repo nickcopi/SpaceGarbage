@@ -301,11 +301,11 @@ class Scene{
 		ctx.fillStyle = 'white';
 		ctx.strokeStyle = 'white';
 		ctx.fillRect(0,bb,canvas.width,1);
-		ctx.font = '20px Asteroids';
+		ctx.font = '20px AsteroidsLite';
 		ctx.fillText(`Wave: ${this.wave}`, 10,bb+30);
 		ctx.fillText(`Score: ${this.score}`, 10,bb+55);
 		ctx.fillText(`Lives: ${this.lives}`, 10,bb+80);
-		ctx.font = '30px Asteroids';
+		ctx.font = '30px AsteroidsLite';
 		ctx.fillText(this.infoText, 180,bb+60);
 		ctx.font = '20px Asteroids';
 		let auto = you.weapons[you.currentWeapon].auto;
