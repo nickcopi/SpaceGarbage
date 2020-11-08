@@ -1,0 +1,11 @@
+{
+	"name":"Space Garbage",
+	"tags":["Game"],
+	"description":"A combination of space invaders and asteroids. Made in 7 hours for Github's Local Hack Day and Ludum Dare 43.",
+	"embed":{
+		"width":1290,
+		"height":730,
+		"file":"index.html"
+	},
+	"date":"December 2018"
+}
